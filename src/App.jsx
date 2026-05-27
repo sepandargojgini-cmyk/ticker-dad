@@ -26,17 +26,7 @@ import {
 } from 'lucide-react';
 
 // API Configuration
-// Safely evaluate environment variables to prevent ES2015 target compilation warnings
-const getApiKey = () => {
-  try {
-    const envGetter = new Function("return import.meta.env");
-    return envGetter()?.VITE_GEMINI_API_KEY || "";
-  } catch (e) {
-    return "";
-  }
-};
-
-const apiKey = getApiKey(); 
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || ""; 
 const GEMINI_MODEL = "gemini-2.5-flash";
 
 const PREBAKED_STOCKS = {
