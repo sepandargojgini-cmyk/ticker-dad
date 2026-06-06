@@ -33,6 +33,7 @@ const PREBAKED_STOCKS = {
   AAPL: {
     ticker: "AAPL",
     companyName: "Apple Inc.",
+    recommendation: "Hold",
     earnings: "Apple is like the ultimate luxury suburban lawn mower. It's expensive to buy, but everyone in the neighborhood wants one, and once you start using their ecosystem (iPhones, Apple Watch, iCloud), you are locked in. They generate massive piles of cash because they don't just sell you the hardware; they keep charging you 'rent' for services every month.",
     valuation: "Historically, it's priced like a top-of-the-line Weber Grill. You are paying a premium for the brand and reliability. It's rarely 'cheap,' but you're paying for a product that holds its value. Right now, it's trading at a premium, meaning you are paying extra for that shiny Apple logo.",
     risks: "Their biggest risk is that we've reached 'peak smartphone.' If people start keeping their old iPhones for 4 or 5 years instead of upgrading every 2, that massive cash machine slows down. Also, if governments force them to open up their App Store lockbox, they lose some of that lucrative toll-road revenue.",
@@ -43,6 +44,7 @@ const PREBAKED_STOCKS = {
   NVDA: {
     ticker: "NVDA",
     companyName: "NVIDIA Corporation",
+    recommendation: "Buy",
     earnings: "NVIDIA is currently the only store in town selling the high-end shovels for the AI Gold Rush. Every massive tech company (Microsoft, Google, Meta) is throwing billions of dollars at them to buy their microchips (GPUs). They are making money faster than a teenager with a fresh driver's license and unlimited gas money.",
     valuation: "It is priced like a high-performance Italian sports car. Sure, it goes incredibly fast, but if there's a single dent in the bumper (or a slight miss in sales growth), the repair bill will be astronomical. The price expects absolute perfection for the next five years.",
     risks: "What goes up must eventually find a cruise altitude. If Big Tech realizes they bought too many 'shovels' and don't actually know how to make money from the AI gold, they will stop ordering chips. Also, competitors like AMD and even their own customers are trying to build their own chips to cut NVIDIA out.",
@@ -53,6 +55,7 @@ const PREBAKED_STOCKS = {
   TSLA: {
     ticker: "TSLA",
     companyName: "Tesla, Inc.",
+    recommendation: "Hold",
     earnings: "Tesla is a car company, a battery factory, and a robotics lab all rolled into one chaotic garage. They make great profit margins on electric vehicles compared to old-school carmakers, but vehicle sales are highly cyclical—when budgets get tight, people don't buy new luxury EVs.",
     valuation: "If you value them just as a car manufacturer, the price is absurdly expensive. If you value them as a futuristic robotics and autonomous taxi company, it might make sense. You are essentially paying for a promise of the future, not just the cars on the road today.",
     risks: "Elon Musk is both their greatest asset and a wild card. If he gets distracted by his other five companies, or if cheap Chinese electric vehicles flood the market, Tesla's margins will get squeezed like a lemon in a lemonade stand.",
@@ -63,6 +66,7 @@ const PREBAKED_STOCKS = {
   SBUX: {
     ticker: "SBUX",
     companyName: "Starbucks Corporation",
+    recommendation: "Buy",
     earnings: "Starbucks makes money by selling premium daily habits. It's the 'Third Place' between home and work. They generate massive cash flow because coffee has incredibly low raw ingredient costs, and their mobile app functions basically like a bank where customers deposit millions of prepay dollars.",
     valuation: "It's priced like a reliable household appliance. It's not a flashy sports car, but it's consistent. Right now, because of some growth struggles in China and local competition, it is trading at a more reasonable valuation than it has in years—essentially on a minor department store discount.",
     risks: "Coffee beans are getting more expensive to grow due to climate changes, and labor costs are rising as workers push for unionization. Also, if the economy really slows down, people might decide to make their coffee at home instead of paying $7 for a Caramel Macchiato.",
@@ -146,13 +150,13 @@ export default function App() {
     4. Risks: What could break the engine or blow off the roof? (List 1-2 major threats).
     5. AI Exposure: Are they riding the high-tech robot wave, or just slapping a trendy sticker on a basic tool?
     6. Historical Context: Is it currently marked up for holiday hype, or sitting on the clearance rack?
-    7. Dad's Take: Your ultimate warm, common-sense summary. Remind the user to protect their emergency fund.`;
+    7. Recommendation: Is this stock a Buy, Hold, or Sell right now? Explain the reasoning in clear dad language.
+    8. Dad's Take: Your ultimate warm, common-sense summary. Remind the user to protect their emergency fund.`;
 
     const payload = {
       contents: [{
         parts: [{ text: userQuery }]
       }],
-      tools: [{ "google_search": {} }],
       systemInstruction: {
         parts: [{ text: systemPrompt }]
       },
@@ -163,6 +167,7 @@ export default function App() {
           properties: {
             ticker: { type: "STRING" },
             companyName: { type: "STRING" },
+            recommendation: { type: "STRING" },
             earnings: { type: "STRING" },
             valuation: { type: "STRING" },
             risks: { type: "STRING" },
@@ -170,7 +175,7 @@ export default function App() {
             historical_context: { type: "STRING" },
             dad_take: { type: "STRING" }
           },
-          required: ["ticker", "companyName", "earnings", "valuation", "risks", "ai_exposure", "historical_context", "dad_take"]
+          required: ["ticker", "companyName", "recommendation", "earnings", "valuation", "risks", "ai_exposure", "historical_context", "dad_take"]
         }
       }
     };
@@ -377,7 +382,7 @@ export default function App() {
                       Searching...
                     </>
                   ) : (
-                    "Explain It"
+                    "Explain Buy/Hold/Sell"
                   )}
                 </button>
               </form>
@@ -462,11 +467,20 @@ export default function App() {
                 {/* Title */}
                 <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 text-xs font-mono font-extrabold rounded-md border border-emerald-500/20">
                         {analysis.ticker}
                       </span>
                       <h2 className="text-xl font-extrabold text-white">{analysis.companyName}</h2>
+                      {analysis.recommendation && (
+                        <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full uppercase ${
+                          analysis.recommendation === 'Buy' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' :
+                          analysis.recommendation === 'Hold' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' :
+                          'bg-rose-500/10 text-rose-300 border border-rose-500/20'
+                        }`}>
+                          {analysis.recommendation}
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-slate-400">Analysis updated recently using direct grounded intelligence.</p>
                   </div>
@@ -578,6 +592,11 @@ export default function App() {
                   <p className="text-xs text-emerald-100/90 leading-relaxed italic font-medium mb-4">
                     "{analysis.dad_take}"
                   </p>
+                  {analysis.recommendation && (
+                    <div className="mb-4 p-3 bg-emerald-950/20 rounded-xl border border-emerald-900/30 text-[11px] text-emerald-200">
+                      <strong>Recommendation:</strong> {analysis.recommendation}. {analysis.recommendation === 'Buy' ? 'This means TickerDad thinks the stock is worth considering for your family’s watchlist right now.' : analysis.recommendation === 'Hold' ? 'This means it may be best to keep it as is and wait for a better entry or more clarity.' : 'This means TickerDad sees more risk than reward right now and suggests staying away.'}
+                    </div>
+                  )}
                   <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2">
                     <Info size={14} className="text-emerald-400 shrink-0 mt-0.5" />
                     <span>
